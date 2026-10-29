@@ -1,0 +1,57 @@
+// fastfetch — logo perso 3 vagues + Tokyo Night (ricing 2026-10-27)
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "file",
+    "source": "~/.config/fastfetch/logo.txt",
+    "color": { "1": "#f13c3c", "2": "#23db1d", "3": "#1eb6e4" },
+    "padding": { "top": 1, "left": 1, "right": 3 }
+  },
+  "display": {
+    "separator": "  ",
+    "color": { "keys": "#7aa2f7", "title": "#c0caf5" },
+    "key": { "width": 0 },
+    "bar": { "char": { "elapsed": "■", "total": "■" }, "width": 10 },
+    "percent": { "type": 3, "color": { "green": "#9ece6a", "yellow": "#e0af68", "red": "#f7768e" } }
+  },
+  "modules": [
+    "break",
+    { "type": "title", "format": "{user-name-colored}{at-symbol-colored}{host-name-colored}" },
+
+    { "type": "custom", "format": "\u001b[38;2;241;60;60m╭─ Système" },
+    { "type": "os",         "key": "│  OS          ", "keyColor": "#f13c3c" },
+    { "type": "host",       "key": "│ 󰌢 Machine     ", "keyColor": "#f13c3c" },
+    { "type": "kernel",     "key": "│  Kernel      ", "keyColor": "#f13c3c" },
+    { "type": "initsystem", "key": "│ 󰒓 Init        ", "keyColor": "#f13c3c" },
+    { "type": "uptime",     "key": "│ 󰅐 Uptime      ", "keyColor": "#f13c3c" },
+    { "type": "locale",     "key": "│  Langue      ", "keyColor": "#f13c3c" },
+
+    { "type": "custom", "format": "\u001b[38;2;35;219;29m├─ Bureau" },
+    { "type": "de",           "key": "│  DE          ", "keyColor": "#23db1d" },
+    { "type": "wm",           "key": "│  WM          ", "keyColor": "#23db1d" },
+    { "type": "theme",        "key": "│ 󰏘 Thème       ", "keyColor": "#23db1d" },
+    { "type": "icons",        "key": "│ 󰀻 Icônes      ", "keyColor": "#23db1d" },
+    { "type": "font",         "key": "│  Police      ", "keyColor": "#23db1d" },
+    { "type": "shell",        "key": "│  Shell       ", "keyColor": "#23db1d" },
+    { "type": "terminal",     "key": "│  Terminal    ", "keyColor": "#23db1d" },
+    { "type": "terminalfont", "key": "│  Police term ", "keyColor": "#23db1d" },
+
+    { "type": "custom", "format": "\u001b[38;2;30;182;228m├─ Matériel" },
+    { "type": "cpu",      "key": "│  CPU         ", "keyColor": "#1eb6e4", "showPeCoreCount": true, "temp": true },
+    { "type": "gpu",      "key": "│ 󰢮 GPU         ", "keyColor": "#1eb6e4", "driverSpecific": true, "temp": true },
+    { "type": "memory",   "key": "│ 󰍛 RAM         ", "keyColor": "#1eb6e4" },
+    { "type": "disk",     "key": "│ 󰋊 Disque      ", "keyColor": "#1eb6e4", "folders": "/" },
+    { "type": "display",  "key": "│ 󰍹 Écran       ", "keyColor": "#1eb6e4" },
+    { "type": "battery",  "key": "│ 󰁹 Batterie    ", "keyColor": "#1eb6e4" },
+
+    { "type": "custom", "format": "\u001b[38;2;187;154;247m├─ Réseau" },
+    { "type": "wifi",     "key": "│  Wi-Fi       ", "keyColor": "#bb9af7", "format": "{ssid} ({protocol}, {signal-quality})" },
+    { "type": "localip",  "key": "│ 󰩟 IP locale   ", "keyColor": "#bb9af7", "showIpv6": false, "compact": true },
+    { "type": "bluetooth","key": "│ 󰂯 Bluetooth   ", "keyColor": "#bb9af7" },
+
+    { "type": "custom", "format": "\u001b[38;2;65;72;104m╰─────────────" },
+
+    "break",
+    { "type": "colors", "symbol": "circle", "paddingLeft": 2 }
+  ]
+}
