@@ -2,7 +2,7 @@
 # Installe le ricing Tokyo Night sur une session GNOME (Fedora testé, GNOME 50).
 # Tout s'installe dans le dossier utilisateur : pas besoin de sudo.
 #
-# Usage : ./install.sh [--wallpaper akihabara|tokyonight] [--no-kitty] [--no-spotify-fix] [--no-claude-usage]
+# Usage : ./install.sh [--wallpaper akihabara|tokyonight] [--no-kitty] [--no-spotify-fix] [--no-claude-usage] [--no-apps]
 set -euo pipefail
 
 # ─── Options ──────────────────────────────────────────────────────────────────
@@ -10,12 +10,14 @@ WALLPAPER="akihabara"
 WITH_KITTY=1
 SPOTIFY_FIX=1
 CLAUDE_USAGE=1
+WITH_APPS=1
 while [ $# -gt 0 ]; do
   case "$1" in
     --wallpaper) WALLPAPER="$2"; shift 2 ;;
     --no-kitty) WITH_KITTY=0; shift ;;
     --no-spotify-fix) SPOTIFY_FIX=0; shift ;;
     --no-claude-usage) CLAUDE_USAGE=0; shift ;;
+    --no-apps) WITH_APPS=0; shift ;;
     -h|--help) sed -n '2,5p' "$0"; exit 0 ;;
     *) echo "Option inconnue : $1" >&2; exit 1 ;;
   esac
@@ -147,11 +149,83 @@ if [ "$WITH_KITTY" = 1 ]; then
   ok "kitty $KV (signature GPG vérifiée), terminal par défaut"
 fi
 
+# ─── Applications ─────────────────────────────────────────────────────────────
+# Rien n'est réinstallé si l'app est déjà présente (paquet dnf, Flatpak système…).
+if [ "$WITH_APPS" = 1 ]; then
+  say "Applications"
+
+  # fastfetch : binaire officiel GitHub, SHA256 vérifié via l'API des releases
+  if command -v fastfetch >/dev/null; then
+    ok "fastfetch (déjà installé)"
+  else
+    FF=fastfetch-linux-amd64.tar.gz
+    FF_SHA="$(curl -fsSL https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest | python3 -I -c '
+import sys, json
+a = [a for a in json.load(sys.stdin)["assets"] if a["name"] == sys.argv[1]][0]
+print(a["digest"].removeprefix("sha256:"))' "$FF")"
+    curl -fsSL -o "$TMP/$FF" "https://github.com/fastfetch-cli/fastfetch/releases/latest/download/$FF"
+    echo "$FF_SHA  $TMP/$FF" | sha256sum -c --quiet
+    tar -xzf "$TMP/$FF" -C "$TMP"
+    rm -rf "$HOME/.local/fastfetch" && mv "$TMP/fastfetch-linux-amd64/usr" "$HOME/.local/fastfetch"
+    ln -sf "$HOME/.local/fastfetch/bin/fastfetch" "$BIN/fastfetch"
+    ok "fastfetch $("$BIN/fastfetch" --version | awk '{print $2}') (somme SHA256 vérifiée)"
+  fi
+
+  # Claude Code : installeur officiel (vérifie lui-même les sommes, s'installe dans ~/.local/bin)
+  if command -v claude >/dev/null || [ -x "$BIN/claude" ]; then
+    ok "Claude Code (déjà installé)"
+  else
+    curl -fsSL -o "$TMP/claude-install.sh" https://claude.ai/install.sh
+    bash "$TMP/claude-install.sh" >/dev/null
+    ok "Claude Code"
+  fi
+
+  # VS Code : archive officielle dans ~/.local/vscode (pas de Flatpak : son terminal
+  # serait isolé du système et ne verrait ni claude ni les outils de dev)
+  if command -v code >/dev/null; then
+    ok "VS Code (déjà installé)"
+  else
+    curl -fsSL -o "$TMP/vscode.tar.gz" "https://update.code.visualstudio.com/latest/linux-x64/stable"
+    tar -xzf "$TMP/vscode.tar.gz" -C "$TMP"
+    rm -rf "$HOME/.local/vscode" && mv "$TMP/VSCode-linux-x64" "$HOME/.local/vscode"
+    ln -sf "$HOME/.local/vscode/bin/code" "$BIN/code"
+    cat > "$SHARE/applications/code.desktop" <<EOF
+[Desktop Entry]
+Name=Visual Studio Code
+Comment=Code Editing. Redefined.
+Exec=$HOME/.local/vscode/bin/code %F
+Icon=$HOME/.local/vscode/resources/app/resources/linux/code.png
+Type=Application
+StartupWMClass=Code
+Categories=Development;IDE;TextEditor;
+MimeType=text/plain;inode/directory;
+EOF
+    ok "VS Code (relance ./install.sh pour le mettre à jour)"
+  fi
+
+  # Spotify et Discord : Flatpak depuis Flathub, installation utilisateur
+  if command -v flatpak >/dev/null; then
+    flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    for app in com.spotify.Client:Spotify com.discordapp.Discord:Discord; do
+      id="${app%%:*}"; name="${app#*:}"
+      if flatpak info "$id" >/dev/null 2>&1; then
+        ok "$name (déjà installé)"
+      elif flatpak install --user -y --noninteractive flathub "$id" >/dev/null; then
+        ok "$name (Flatpak)"
+      else
+        warn "$name : échec de l'installation Flatpak"
+      fi
+    done
+  else
+    warn "flatpak absent : Spotify et Discord ignorés"
+  fi
+fi
+
 # ─── fastfetch ────────────────────────────────────────────────────────────────
 say "fastfetch"
 mkdir -p "$CONF/fastfetch"
 cp "$REPO/config/fastfetch/"* "$CONF/fastfetch/"
-command -v fastfetch >/dev/null && ok "config copiée" || warn "config copiée, mais fastfetch n'est pas installé (sudo dnf install fastfetch)"
+command -v fastfetch >/dev/null || [ -x "$BIN/fastfetch" ] && ok "config copiée" || warn "config copiée, mais fastfetch n'est pas installé"
 
 # ─── zsh ──────────────────────────────────────────────────────────────────────
 say "zsh"

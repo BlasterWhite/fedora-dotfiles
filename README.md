@@ -12,6 +12,7 @@ Thème Tokyo Night pour GNOME (testé sur Fedora 44, GNOME 50), installable sur 
 | Prompt | Starship, preset Tokyo Night |
 | fastfetch | logo perso 3 vagues + infos en sections |
 | Extensions | Blur my Shell, Just Perfection, Rounded Window Corners, AppIndicator, Clipboard Indicator, Spotify Controls, Vitals, [Claude Usage](https://github.com/BlasterWhite/claude-usage-gnome) |
+| Applications | fastfetch, Claude Code, VS Code (archive officielle), Spotify et Discord (Flatpak) — ignorées si déjà installées |
 | Fond d'écran | Akihabara (par défaut) ou skyline Tokyo Night générée |
 | Divers | Spotify en XWayland (barre de titre GNOME), redimensionnement Super + clic droit |
 
@@ -32,10 +33,11 @@ Options :
 ./install.sh --no-kitty               # garder le terminal actuel
 ./install.sh --no-spotify-fix         # ne pas toucher à Spotify
 ./install.sh --no-claude-usage        # sans l'extension Claude Usage
+./install.sh --no-apps                # n'installe aucune application
 ```
 
-Prérequis : GNOME, `zsh`, `curl`, `git`, `gpg`, `python3`, `unzip` (présents de base sur Fedora Workstation).
-`fastfetch` n'est pas installé par le script : `sudo dnf install fastfetch`.
+Prérequis : GNOME, `zsh`, `curl`, `git`, `gpg`, `python3`, `unzip`, `flatpak` (présents de base sur Fedora Workstation).
+Les applications ne sont pas retirées par `restore.sh`.
 
 ## Ce que fait le script
 
