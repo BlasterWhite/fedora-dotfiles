@@ -2,18 +2,20 @@
 # Installe le ricing Tokyo Night sur une session GNOME (Fedora testé, GNOME 50).
 # Tout s'installe dans le dossier utilisateur : pas besoin de sudo.
 #
-# Usage : ./install.sh [--wallpaper akihabara|tokyonight] [--no-kitty] [--no-spotify-fix]
+# Usage : ./install.sh [--wallpaper akihabara|tokyonight] [--no-kitty] [--no-spotify-fix] [--no-claude-usage]
 set -euo pipefail
 
 # ─── Options ──────────────────────────────────────────────────────────────────
 WALLPAPER="akihabara"
 WITH_KITTY=1
 SPOTIFY_FIX=1
+CLAUDE_USAGE=1
 while [ $# -gt 0 ]; do
   case "$1" in
     --wallpaper) WALLPAPER="$2"; shift 2 ;;
     --no-kitty) WITH_KITTY=0; shift ;;
     --no-spotify-fix) SPOTIFY_FIX=0; shift ;;
+    --no-claude-usage) CLAUDE_USAGE=0; shift ;;
     -h|--help) sed -n '2,5p' "$0"; exit 0 ;;
     *) echo "Option inconnue : $1" >&2; exit 1 ;;
   esac
@@ -190,6 +192,22 @@ print(m.get(sys.argv[1], {}).get("pk", ""))' "$SHELL_MAJOR" 2>/dev/null || true)
   gnome-extensions install --force "$TMP/$uuid.zip"
   ENABLED+=("$uuid"); ok "$uuid"
 done
+# Claude Usage : extension perso, hors extensions.gnome.org (github.com/BlasterWhite/claude-usage-gnome)
+if [ "$CLAUDE_USAGE" = 1 ]; then
+  CU=claude-usage@perso
+  if [ -L "$SHARE/gnome-shell/extensions/$CU" ]; then
+    ok "$CU (lien de dev déjà en place, non modifié)"
+  elif command -v glib-compile-schemas >/dev/null; then
+    git clone -q --depth 1 https://github.com/BlasterWhite/claude-usage-gnome.git "$TMP/claude-usage"
+    glib-compile-schemas "$TMP/claude-usage/$CU/schemas"
+    rm -rf "$SHARE/gnome-shell/extensions/$CU"
+    cp -a "$TMP/claude-usage/$CU" "$SHARE/gnome-shell/extensions/$CU"
+    ok "$CU"
+  else
+    warn "$CU : glib-compile-schemas manquant, ignorée"
+  fi
+  [ -e "$SHARE/gnome-shell/extensions/$CU" ] && ENABLED+=("$CU")
+fi
 # ajoute les extensions à la liste existante sans retirer celles déjà actives
 python3 -I - "${ENABLED[@]}" <<'EOF'
 import ast, subprocess, sys
@@ -199,6 +217,7 @@ subprocess.check_call(["gsettings", "set", "org.gnome.shell", "enabled-extension
 EOF
 gsettings set org.gnome.shell disable-user-extensions false
 dconf load /org/gnome/shell/extensions/vitals/ < "$REPO/dconf/vitals.ini"
+[ "$CLAUDE_USAGE" = 1 ] && dconf load /org/gnome/shell/extensions/claude-usage/ < "$REPO/dconf/claude-usage.ini"
 
 # ─── Réglages GNOME, fond d'écran, raccourcis ─────────────────────────────────
 say "Réglages GNOME"

@@ -11,7 +11,7 @@ Thème Tokyo Night pour GNOME (testé sur Fedora 44, GNOME 50), installable sur 
 | Terminal | kitty (sans barre de titre, onglets, splits), terminal par défaut |
 | Prompt | Starship, preset Tokyo Night |
 | fastfetch | logo perso 3 vagues + infos en sections |
-| Extensions | Blur my Shell, Just Perfection, Rounded Window Corners, AppIndicator, Clipboard Indicator, Spotify Controls, Vitals |
+| Extensions | Blur my Shell, Just Perfection, Rounded Window Corners, AppIndicator, Clipboard Indicator, Spotify Controls, Vitals, [Claude Usage](https://github.com/BlasterWhite/claude-usage-gnome) |
 | Fond d'écran | Akihabara (par défaut) ou skyline Tokyo Night générée |
 | Divers | Spotify en XWayland (barre de titre GNOME), redimensionnement Super + clic droit |
 
@@ -31,6 +31,7 @@ Options :
 ./install.sh --wallpaper tokyonight   # fond d'écran skyline au lieu d'Akihabara
 ./install.sh --no-kitty               # garder le terminal actuel
 ./install.sh --no-spotify-fix         # ne pas toucher à Spotify
+./install.sh --no-claude-usage        # sans l'extension Claude Usage
 ```
 
 Prérequis : GNOME, `zsh`, `curl`, `git`, `gpg`, `python3`, `unzip` (présents de base sur Fedora Workstation).
